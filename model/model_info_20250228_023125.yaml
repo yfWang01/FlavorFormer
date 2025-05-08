@@ -1,0 +1,186 @@
+cnn_params:
+  input_dim: 39042
+  output_dim: 128
+  channels:
+  - 64
+  - 64
+  - 64
+  kernel_size:
+  - 5
+  - 5
+  - 5
+  stride:
+  - 3
+  - 3
+  - 3
+  pool_size:
+  - 2
+  - 2
+  - 2
+  dropout: 0.1
+encoder_params:
+  input_dim: 128
+  hidden_dim: 64
+  num_heads: 4
+  num_layers: 4
+  dropout: 0.1
+  seq_len: 363
+  input_shape: !!python/tuple
+  - 256
+  - 180
+  - 128
+training_config:
+  batch_size: 256
+  learning_rate: 5.0e-05
+  weight_decay: 1.0e-06
+  num_epochs: 100
+  positive_weight: 3.0
+cnn_output_shape: !!python/object/apply:torch.Size
+- !!python/tuple
+  - 1
+  - 128
+  - 180
+dataset_name: data/augmented_data/50000_samples_7_pc_0.001_noise_airPLS_12.5_0.57_shift30-5/train_dataset.pkl
+cnn_model_info: '==========================================================================================
+
+  Layer (type:depth-idx)                   Output Shape              Param #
+
+  ==========================================================================================
+
+  CNNFeatureExtractor                      [256, 128, 180]           --
+
+  ├─Sequential: 1-1                        --                        --
+
+  │    └─Conv1d: 2-1                       [256, 64, 13007]          384
+
+  │    └─BatchNorm1d: 2-2                  [256, 64, 13007]          128
+
+  │    └─ReLU: 2-3                         [256, 64, 13007]          --
+
+  │    └─MaxPool1d: 2-4                    [256, 64, 6503]           --
+
+  │    └─Dropout: 2-5                      [256, 64, 6503]           --
+
+  │    └─Conv1d: 2-6                       [256, 64, 2167]           20,544
+
+  │    └─BatchNorm1d: 2-7                  [256, 64, 2167]           128
+
+  │    └─ReLU: 2-8                         [256, 64, 2167]           --
+
+  │    └─MaxPool1d: 2-9                    [256, 64, 1083]           --
+
+  │    └─Dropout: 2-10                     [256, 64, 1083]           --
+
+  │    └─Conv1d: 2-11                      [256, 64, 360]            20,544
+
+  │    └─BatchNorm1d: 2-12                 [256, 64, 360]            128
+
+  │    └─ReLU: 2-13                        [256, 64, 360]            --
+
+  │    └─MaxPool1d: 2-14                   [256, 64, 180]            --
+
+  │    └─Dropout: 2-15                     [256, 64, 180]            --
+
+  │    └─Conv1d: 2-16                      [256, 128, 180]           8,320
+
+  ==========================================================================================
+
+  Total params: 50,176
+
+  Trainable params: 50,176
+
+  Non-trainable params: 0
+
+  Total mult-adds (Units.GIGABYTES): 14.95
+
+  ==========================================================================================
+
+  Input size (MB): 39.96
+
+  Forward/backward pass size (MB): 4119.33
+
+  Params size (MB): 0.20
+
+  Estimated Total Size (MB): 4159.49
+
+  =========================================================================================='
+encoder_model_info: '===============================================================================================
+
+  Layer (type:depth-idx)                        Output Shape              Param #
+
+  ===============================================================================================
+
+  CrossEncoder                                  [256, 1]                  128
+
+  ├─Linear: 1-1                                 [256, 180, 64]            8,256
+
+  ├─Linear: 1-2                                 [256, 180, 64]            (recursive)
+
+  ├─PositionalEncoding: 1-3                     [256, 363, 64]            --
+
+  │    └─Dropout: 2-1                           [256, 363, 64]            --
+
+  ├─TransformerEncoder: 1-4                     [256, 363, 64]            --
+
+  │    └─ModuleList: 2-2                        --                        --
+
+  │    │    └─TransformerEncoderLayer: 3-1      [256, 363, 64]            281,152
+
+  │    │    └─TransformerEncoderLayer: 3-2      [256, 363, 64]            281,152
+
+  │    │    └─TransformerEncoderLayer: 3-3      [256, 363, 64]            281,152
+
+  │    │    └─TransformerEncoderLayer: 3-4      [256, 363, 64]            281,152
+
+  ├─Linear: 1-5                                 [256, 1]                  129
+
+  ===============================================================================================
+
+  Total params: 1,133,121
+
+  Trainable params: 1,133,121
+
+  Non-trainable params: 0
+
+  Total mult-adds (Units.MEGABYTES): 4.26
+
+  ===============================================================================================
+
+  Input size (MB): 47.19
+
+  Forward/backward pass size (MB): 47.19
+
+  Params size (MB): 0.03
+
+  Estimated Total Size (MB): 94.41
+
+  ==============================================================================================='
+cnn_model_structure: "CNNFeatureExtractor(\n  (cnn): Sequential(\n    (0): Conv1d(1,\
+  \ 64, kernel_size=(5,), stride=(3,), padding=valid)\n    (1): BatchNorm1d(64, eps=1e-05,\
+  \ momentum=0.1, affine=True, track_running_stats=True)\n    (2): ReLU()\n    (3):\
+  \ MaxPool1d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)\n \
+  \   (4): Dropout(p=0.1, inplace=False)\n    (5): Conv1d(64, 64, kernel_size=(5,),\
+  \ stride=(3,), padding=valid)\n    (6): BatchNorm1d(64, eps=1e-05, momentum=0.1,\
+  \ affine=True, track_running_stats=True)\n    (7): ReLU()\n    (8): MaxPool1d(kernel_size=2,\
+  \ stride=2, padding=0, dilation=1, ceil_mode=False)\n    (9): Dropout(p=0.1, inplace=False)\n\
+  \    (10): Conv1d(64, 64, kernel_size=(5,), stride=(3,), padding=valid)\n    (11):\
+  \ BatchNorm1d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)\n\
+  \    (12): ReLU()\n    (13): MaxPool1d(kernel_size=2, stride=2, padding=0, dilation=1,\
+  \ ceil_mode=False)\n    (14): Dropout(p=0.1, inplace=False)\n    (15): Conv1d(64,\
+  \ 128, kernel_size=(1,), stride=(1,))\n  )\n)"
+transformer_model_structure: "CrossEncoder(\n  (embedding): Linear(in_features=128,\
+  \ out_features=64, bias=True)\n  (pos_encoder): PositionalEncoding(\n    (dropout):\
+  \ Dropout(p=0.1, inplace=False)\n  )\n  (transformer): TransformerEncoder(\n   \
+  \ (layers): ModuleList(\n      (0-3): 4 x TransformerEncoderLayer(\n        (self_attn):\
+  \ MultiheadAttention(\n          (out_proj): NonDynamicallyQuantizableLinear(in_features=64,\
+  \ out_features=64, bias=True)\n        )\n        (linear1): Linear(in_features=64,\
+  \ out_features=2048, bias=True)\n        (dropout): Dropout(p=0.1, inplace=False)\n\
+  \        (linear2): Linear(in_features=2048, out_features=64, bias=True)\n     \
+  \   (norm1): LayerNorm((64,), eps=1e-05, elementwise_affine=True)\n        (norm2):\
+  \ LayerNorm((64,), eps=1e-05, elementwise_affine=True)\n        (dropout1): Dropout(p=0.1,\
+  \ inplace=False)\n        (dropout2): Dropout(p=0.1, inplace=False)\n      )\n \
+  \   )\n  )\n  (fc_combined): Linear(in_features=128, out_features=1, bias=True)\n\
+  )"
+cnn_parameternum: 50176
+encoder_parameternum: 1133121
+timestamp: '20250228_023125'
