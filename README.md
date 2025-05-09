@@ -25,7 +25,5 @@ conda activate FlavorFormer
 # Run directly
 
 
-**Training your model and predict mixture spectra data**
-
-Run the file 'demo.ipynb'. The model parameters is located in the [model](model/) folder and the required data is in the [data](data/) folder, FlavorFormer can be reload and predict easily.
+For training model and predict mixture spectra data, run the file   `demo.ipynb`. The model parameters is located in the [model](model/) folder and the required data is in the [data](data/) folder, FlavorFormer can be reload and predict easily.
 
