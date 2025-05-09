@@ -9,7 +9,7 @@ Python 3.13.2 and Pytorch (version 2.7.0+cu118)
 
 Install [Anaconda](https://www.anaconda.com/).
 
-# Clone the repo and run it directly
+## Clone the repo and run it directly
 
 ```shell
 git clone https://github.com/yfWang01/FlavorFormer.git
@@ -22,7 +22,7 @@ conda env create -f environment.yml
 conda activate FlavorFormer
 ```
 
-# Download the model and run directly
+# Run directly
 
 
 **Training your model and predict mixture spectra data**
