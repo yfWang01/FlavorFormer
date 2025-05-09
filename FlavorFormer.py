@@ -386,8 +386,9 @@ def load_model(model_path, cnn_model_path=None, encoder_model_path=None, yaml_pa
 
 def main():
     BATCH_SIZE = 256
-    train_data_pattern = r'F:\wyf\project\target\data\augment_data\data_augment_train_80000_30_20flavors_10_pf0.01-0.25_so0.2-0.45_2-10_PG0411_nl0.0001_IS.pkl'
-    valid_data_pattern = r'F:\wyf\project\target\data\augment_data\data_augment_valid_10000_30_20flavors_10_pf0.01-0.25_so0.2-0.45_2-10_PG0411_nl0.0001_IS.pkl'
+
+    train_data_pattern = 'data/augmented_data/50000_samples/train_dataset.pkl'
+    valid_data_pattern = 'data/augmented_data/50000_samples/val_dataset.pkl'
 
     train_loader = get_data_loader(NMRDataset(train_data_pattern), batch_size=BATCH_SIZE, shuffle=True)
     val_loader = get_data_loader(NMRDataset(valid_data_pattern), batch_size=BATCH_SIZE, shuffle=True)
@@ -407,34 +408,31 @@ def main():
     cnn_model = CNNFeatureExtractor(**cnn_params)
 
     # define Transformer 
-    encoder_params = {
+    transformer_params = {
         "input_dim": cnn_params["output_dim"],
         "hidden_dim":64,
         "num_heads": 4,
         "num_layers": 4,
         "dropout": 0.1,
-        "seq_len": cnn_output_shape[2] * 2 + 3,
     }
-    encoder_model = CrossEncoder(**encoder_params)
-    encoder_params['input_shape'] = (BATCH_SIZE, cnn_output_shape[2], cnn_output_shape[1])
+    transformer_model = CrossEncoder(**transformer_params)
+    transformer_params['input_shape'] = (BATCH_SIZE, cnn_output_shape[2], cnn_output_shape[1])
     learning_rate = 5e-5
     weight_decay = 1e-6
     num_epochs = 100
-    timestamp = datetime.now().strftime("%m%d_%H%M")
-    early_stopping_patience=20
     positive_weight = 3.0
-    save_path = f"model/time_{timestamp}_epoch_{num_epochs}_lr_{learning_rate}_wd_{weight_decay}_cls_mean_ologits_shfit_ReduceLROnPlateau"
+    save_path = f"model/epoch_{num_epochs}_lr_{learning_rate}_wd_{weight_decay}"
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    trainer = NMRTrainer(cnn_model, encoder_model, device, learning_rate, weight_decay, tb_logger, positive_weight = positive_weight)
+    trainer = NMRTrainer(cnn_model, transformer_model, device, learning_rate, weight_decay, tb_logger, positive_weight = positive_weight)
 
     trainer.train(train_loader, val_loader, num_epochs, save_path)
 
     # save model
     trainer.save_model(
     cnn_model=cnn_model,
-    encoder_model=encoder_model,
+    transformer_model=transformer_model,
     cnn_params=cnn_params,
-    encoder_params=encoder_params,
+    transformer_params=transformer_params,
     dataset_name=train_data_pattern,
     save_path=save_path,
     batch_size=BATCH_SIZE,
@@ -443,6 +441,7 @@ def main():
     positive_weight = positive_weight,
     num_epochs=num_epochs,
     cnn_output_shape=cnn_output_shape)
+
 
 if __name__ == "__main__":
     main()
