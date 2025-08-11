@@ -16,6 +16,7 @@ import random
 import yaml
 
 
+
 def set_random_seed(seed):
     random.seed(seed)
     np.random.seed(seed)
@@ -167,7 +168,7 @@ class NMRTrainer:
         train_loss_history, val_loss_history = [], []
         train_acc_history, val_acc_history = [], []
 
-        scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(self.optimizer, mode='min', factor=0.5, patience=5, verbose=True)
+        scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(self.optimizer, mode='min', factor=0.5, patience=5)
 
         for epoch in range(num_epochs):
             epoch_start_time = time.time()
@@ -286,11 +287,12 @@ class NMRTrainer:
 
         torch.save(self.cnn_model, cnn_model_filename)
         torch.save(self.encoder_model, encoder_model_filename)
+        torch.save(self.cnn_model.state_dict(), cnn_filename)
+        torch.save(self.encoder_model.state_dict(), encoder_filename)
 
         cnn_structure = str(self.cnn_model)
         encoder_structure = str(self.encoder_model)
-        cnn_info = str(summary(self.cnn_model, input_size=(batch_size, 39024)))
-        encoder_info = str(summary(self.encoder_model, input_size=[encoder_params['input_shape']]*2))
+
 
         device = next(cnn_model.parameters()).device
         with torch.no_grad():
@@ -309,8 +311,6 @@ class NMRTrainer:
             },
             "cnn_output_shape": cnn_output_shape,
             "dataset_name": dataset_name,
-            "cnn_model_info": cnn_info,
-            "encoder_model_info": encoder_info,
             "cnn_model_structure": cnn_structure,
             "transformer_model_structure": encoder_structure,
             "cnn_output_shape":cnn_output_shape,
@@ -416,14 +416,13 @@ def main():
         "dropout": 0.1,
     }
     transformer_model = CrossEncoder(**transformer_params)
-    transformer_params['input_shape'] = (BATCH_SIZE, cnn_output_shape[2], cnn_output_shape[1])
     learning_rate = 5e-5
     weight_decay = 1e-6
     num_epochs = 100
     positive_weight = 3.0
     save_path = f"model/epoch_{num_epochs}_lr_{learning_rate}_wd_{weight_decay}"
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    trainer = NMRTrainer(cnn_model, transformer_model, device, learning_rate, weight_decay, tb_logger, positive_weight = positive_weight)
+    trainer = NMRTrainer(cnn_model, transformer_model, device, learning_rate, weight_decay, positive_weight = positive_weight)
 
     trainer.train(train_loader, val_loader, num_epochs, save_path)
 
